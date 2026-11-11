@@ -1,0 +1,5 @@
+publish.bat
+Thumbs.db
+node_modules/
+assets/js/scan.js
+assets/img/hero-scan*.webp

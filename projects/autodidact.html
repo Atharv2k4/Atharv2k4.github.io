@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUTODIDACT case study · Atharv Yadav</title>
+<meta name="description" content="AUTODIDACT: a self-improving robot learning loop for a two-arm Franka FR3 Duo in MuJoCo, built at the Siemens Healthineers Robotics & AI Hackathon 2026.">
+<meta name="theme-color" content="#0a1020">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top-row">
+    <a class="brand" href="../index.html" aria-label="Atharv Yadav, home">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M3 9V3h6M19 3h6v6M25 19v6h-6M9 25H3v-6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="14" cy="14" r="3" fill="currentColor"/></svg>
+      <span>Atharv Yadav</span>
+    </a>
+    <a class="btn btn-solid btn-cv" style="margin-left:auto" href="../assets/Atharv_Yadav_CV.pdf" download>CV<span class="cv-long"> (PDF)</span></a>
+  </div>
+</header>
+
+<main id="main" class="case">
+  <div class="wrap">
+    <a class="back mono" href="../index.html#projects">← All projects</a>
+    <p class="mono kind" style="color:var(--cool)">Case study · Robot learning</p>
+    <h1>AUTODIDACT: a robot learning loop that teaches itself</h1>
+    <p class="intro">Most teams fine-tune a model and report one success rate. We built the system around the model: it checks the data, trains, tests, finds out what is missing, asks for exactly that data, retrains, and only keeps the new model if the statistics show it is better.</p>
+
+    <dl class="facts">
+      <div><dt class="mono">Event</dt><dd>Siemens Healthineers Robotics &amp; AI Hackathon 2026, Erlangen</dd></div>
+      <div><dt class="mono">Challenge</dt><dd>Teach the Robot: build the autonomous learning loop</dd></div>
+      <div><dt class="mono">Robot</dt><dd>Franka FR3 Duo, two 7-joint arms with Robotiq grippers, simulated in MuJoCo</dd></div>
+      <div><dt class="mono">Time</dt><dd>Two working days, 22–23 October 2026, as a team</dd></div>
+    </dl>
+
+    <figure>
+      <img src="../assets/img/autodidact-ui.webp" width="1200" height="800" alt="The AUTODIDACT learning station showing the simulated two-arm robot stacking cubes, the head-camera image the policy sees, the skill progress and the joint angles.">
+      <figcaption class="mono">The learning station: the simulated robot cell, the camera image the policy sees, and live joint angles.</figcaption>
+    </figure>
+
+    <h2>The problem</h2>
+    <p>The organisers want robots that learn new tasks from demonstrations instead of being programmed, motivated by the shortage of nurses in cardiac catheter labs. They did not ask for a robot that does one task. They asked for the loop that creates, evaluates and deploys new robot skills. Our test task was stacking cubes with two arms.</p>
+
+    <h2>How the loop works</h2>
+    <ol>
+      <li><strong>Check the data.</strong> A validator reads every demonstration episode and gives each problem a reason code.</li>
+      <li><strong>Train.</strong> ACT is the small, fast model that drives the loop. SmolVLA, a vision-language-action model, is fine-tuned on the organisers' real-robot data.</li>
+      <li><strong>Test.</strong> Every model runs on the same frozen set of 72 scenarios in a simulated copy of the robot cell.</li>
+      <li><strong>Find the gaps.</strong> A table area gets a data request if the policy is weak there and has few demonstrations there.</li>
+      <li><strong>Collect and retrain.</strong> A scripted expert records exactly the requested demonstrations and the model is retrained.</li>
+      <li><strong>Gate.</strong> The new model replaces the old one only if the lower end of the 95% confidence interval of the improvement is above zero.</li>
+    </ol>
+
+    <h2>Results</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>What we measured</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Scenarios solved on the frozen 72-scenario test, before and after one loop cycle (average of two seeds)</td><td>7 → 21.5</td></tr>
+          <tr><td>Improvement in success rate accepted by the gate, with 95% confidence interval</td><td>+0.20 (+0.10 to +0.30)</td></tr>
+          <tr><td>The same cycle run fully automatically: 239 demonstrations requested, no human input</td><td>+0.20 (+0.12 to +0.29)</td></tr>
+          <tr><td>Runs in which the arm touched a simulated hand moving into its path, without and with our safety filter (of 40)</td><td>24 → 0</td></tr>
+          <tr><td>SmolVLA on 45 held-out real episodes: average error against the expert's actions</td><td>0.0086 rad</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>What did not work</h2>
+    <ul>
+      <li>In the first cycle the retrained model was worse. The gate rejected it, and the cause turned out to be under-training.</li>
+      <li>SmolVLA is accurate offline on real episodes, but in closed loop in our simulator it does not yet grasp (0 of 72).</li>
+      <li>The automatic success judge rarely calls a failure a success, but it misses many real successes, so unclear cases go to a person.</li>
+      <li>The safety result holds for the one scenario we measured. We do not claim the robot is safe in general.</li>
+    </ul>
+
+    <h2>My part</h2>
+    <p>This was a team project. I contributed across the data checks, the simulation twin, policy training and evaluation.</p>
+
+    <ul class="chips mono" style="list-style:none;padding:0;margin-top:20px"><li>Python</li><li>MuJoCo</li><li>ACT</li><li>SmolVLA</li><li>Imitation learning</li><li>Statistical evaluation</li></ul>
+
+    <p style="margin-top:36px"><a class="btn" href="../index.html#projects">← Back to all projects</a></p>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap mono"><span>Atharv Yadav · Erlangen</span><a href="../index.html#contact">Contact</a></div>
+</footer>
+</body>
+</html>
